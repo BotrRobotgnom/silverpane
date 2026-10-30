@@ -11,6 +11,10 @@ A desktop music player with a frosted-glass interface. **YouTube Music, SoundClo
   <img src="docs/playlists.png" alt="Playlists and local folders" width="48%" />
 </p>
 
+<p align="center">
+  <a href="https://ko-fi.com/botr_robotgnom"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi" /></a>
+</p>
+
 ## Download
 
 Get the latest version from the [Releases page](https://github.com/BotrRobotgnom/silverpane/releases):
@@ -114,6 +118,10 @@ Build from a clone whose `origin` points to GitHub: `electron-builder` reads the
 - YouTube's embedded player shows ads, as any embed does.
 - Local files cannot be added to ordinary playlists yet, and tags cannot be edited.
 - No sign-in with YouTube or SoundCloud accounts.
+
+## Support
+
+Silverpane is free and has no ads of its own. If you like it, you can [buy me a coffee on Ko-fi](https://ko-fi.com/botr_robotgnom). It is never required, and it helps me keep working on the app.
 
 ## License
 
