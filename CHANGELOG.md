@@ -4,6 +4,11 @@ The version scheme is described in [VERSIONING.md](VERSIONING.md).
 Each version has `### Added`, `### Changed` and `### Fixed` parts (only the ones that apply).
 The release notes on GitHub are built from this file automatically (see `scripts/release-notes.mjs`).
 
+## 1.2.0
+
+### Added
+- **Local API** (Settings > API, off by default). Other programs on this computer can read what is playing: `GET /api/v1/now` (state, title, artist, album, year, duration, position, cover address, link), `GET /api/v1/cover` (redirects to the cover) and `GET /api/v1/events` (a live stream of changes). It is read-only, listens on 127.0.0.1 only, and the port can be changed. The documentation is on the same settings page.
+
 ## 1.1.0
 
 ### Added

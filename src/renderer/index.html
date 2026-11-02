@@ -84,6 +84,7 @@
             <button type="button" data-page="appearance" data-i18n="settings.appearance">Appearance</button>
             <button type="button" data-page="updates" data-i18n="settings.updates">Updates</button>
             <button type="button" data-page="developer" data-i18n="settings.developer">Developer</button>
+            <button type="button" data-page="api" data-i18n="settings.api">API</button>
           </nav>
           <div class="st-pages">
             <div class="st-page" data-page="general">
@@ -164,6 +165,74 @@
                   <span class="st-text"><b data-i18n="settings.verboseTitle">Verbose logging</b><small data-i18n="settings.verbose">Also record debug-level messages</small></span>
                   <input id="devVerbose" class="switch" type="checkbox" />
                 </label>
+              </div>
+            </div>
+
+            <div class="st-page hidden" data-page="api">
+              <label class="st-row">
+                <span class="st-text"><b data-i18n="api.enable">Local API</b><small data-i18n="api.enableHint">Let other programs on this computer read what is playing. Off by default.</small></span>
+                <input id="apiOn" class="switch" type="checkbox" />
+              </label>
+              <div class="st-row">
+                <span class="st-text"><b data-i18n="api.port">Port</b><small id="apiStatus" class="api-status" data-state="off"></small></span>
+                <input id="apiPort" class="api-port" type="number" min="1024" max="65535" step="1" inputmode="numeric" />
+              </div>
+              <div class="st-row api-urlrow">
+                <code id="apiUrl" class="api-url"></code>
+                <button id="apiCopy" class="swap" type="button" data-i18n="api.copy">Copy</button>
+                <button id="apiTry" class="swap" type="button" data-i18n="api.try">Try</button>
+              </div>
+              <pre id="apiLive" class="api-code hidden"></pre>
+
+              <div class="api-docs">
+                <h3 data-i18n="api.docs">Documentation</h3>
+                <p data-i18n="api.docIntro">The API is read-only and answers only to this computer (127.0.0.1). Every answer is JSON; CORS is open, so a web page (for example an OBS browser source) can read it.</p>
+
+                <h4>GET /api/v1/now</h4>
+                <p data-i18n="api.docNow">What is playing right now.</p>
+<pre class="api-code">{
+  "app": "Silverpane",
+  "version": "1.2.0",
+  "apiVersion": 1,
+  "state": "playing",
+  "track": {
+    "id": "dQw4w9WgXcQ",
+    "source": "youtube",
+    "title": "Song",
+    "artist": "Artist",
+    "album": "Album",
+    "year": 2019,
+    "yearKind": "upload",
+    "durationSec": 213,
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "cover": "https://…/cover.jpg"
+  },
+  "positionSec": 42.5,
+  "positionAt": 1790000000000,
+  "updatedAt": 1789999950000
+}</pre>
+                <ul class="api-list">
+                  <li data-i18n-html="api.docState"><code>state</code>: playing, paused or stopped. When stopped, <code>track</code> is null.</li>
+                  <li data-i18n-html="api.docSource"><code>source</code>: youtube, soundcloud or local. <code>url</code> is empty for local files.</li>
+                  <li data-i18n-html="api.docYear"><code>year</code> may be null. <code>yearKind</code> is release or upload.</li>
+                  <li data-i18n-html="api.docCover"><code>cover</code> is a full address of the picture, or an empty string.</li>
+                  <li data-i18n-html="api.docPos"><code>positionSec</code> was measured at <code>positionAt</code> (ms since 1970). While playing, add the time passed since then.</li>
+                  <li data-i18n-html="api.docUpdated"><code>updatedAt</code> changes when the track, the state or the position (a seek) changes.</li>
+                </ul>
+
+                <h4>GET /api/v1/cover</h4>
+                <p data-i18n="api.docCoverEp">Redirects to the cover of the current track (404 when there is none). Handy as an image address.</p>
+
+                <h4>GET /api/v1/events</h4>
+                <p data-i18n="api.docEvents">A stream of server-sent events. An event named now is sent at once and on every change, with the same JSON as /now.</p>
+<pre class="api-code">const es = new EventSource('http://127.0.0.1:47832/api/v1/events');
+es.addEventListener('now', (e) => {
+  const { state, track } = JSON.parse(e.data);
+  console.log(state, track && track.artist + ' - ' + track.title);
+});</pre>
+
+                <h4 data-i18n="api.docSecurity">Safety</h4>
+                <p data-i18n="api.docSecurityText">The API listens on 127.0.0.1 only and checks the Host header. It cannot control the player or change anything. Switch it off when you do not use it.</p>
               </div>
             </div>
           </div>

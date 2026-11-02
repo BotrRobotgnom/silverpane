@@ -21,6 +21,7 @@ import * as library from './library.js';
 import { getHome, getSimilar, resetCache } from './recommend.js';
 import * as autostart from './autostart.js';
 import * as trayIcon from './tray.js';
+import * as api from './api.js';
 import { registerDebugIpc, openDebugWindow, closeDebugWindow } from './debugWindow.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -131,6 +132,7 @@ async function createWindow() {
     cover: readCover,
   });
   origin = `http://127.0.0.1:${port}`;
+  api.setLocalOrigin(origin);
   logger.info('app', 'Local server started', { origin });
 
   const blurred = effectInfo.defaultEffect !== 'none';
@@ -318,7 +320,13 @@ ipcMain.handle('autostart:get', () => ({ available: autostart.isAvailable(), ena
 ipcMain.handle('autostart:set', (_e, on) => ({ available: autostart.isAvailable(), enabled: autostart.setEnabled(!!on) }));
 ipcMain.on('tray:setCloseToTray', (_e, on) => trayIcon.setCloseToTray(on));
 ipcMain.on('tray:labels', (_e, labels) => trayIcon.setLabels(labels));
-ipcMain.on('player:state', (_e, info) => trayIcon.setNowPlaying(info));
+ipcMain.on('player:state', (_e, info) => {
+  trayIcon.setNowPlaying(info);
+  api.setNow(info);
+});
+// The local API: the page sends its settings at start and when they change
+ipcMain.handle('api:now', () => (api.isOn() ? api.snapshot() : null)); // the "Try" button: the page may not call the API itself (its security policy)
+ipcMain.handle('api:configure', (_e, cfg) => api.configure({ enabled: !!cfg?.enabled, port: Number(cfg?.port) }));
 ipcMain.handle('win:alwaysOnTop', (_e, on) => win?.setAlwaysOnTop(!!on));
 ipcMain.handle('win:getInfo', async () => ({
   ...effectInfo,
@@ -559,6 +567,7 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 app.on('before-quit', () => {
+  api.stop();
   trayIcon.markQuitting();
   library.flushLibrary();
 });

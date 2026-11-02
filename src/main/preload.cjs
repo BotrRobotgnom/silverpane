@@ -59,6 +59,10 @@ contextBridge.exposeInMainWorld('api', {
   debug: {
     open: () => ipcRenderer.invoke('debug:open'),
   },
+  api: {
+    configure: (cfg) => ipcRenderer.invoke('api:configure', cfg),
+    now: () => ipcRenderer.invoke('api:now'),
+  },
   player: {
     // current track for the tray (title, artist, position, ...)
     report: (info) => ipcRenderer.send('player:state', info),

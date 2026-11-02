@@ -53,6 +53,9 @@ npm start
 - **History** (recent, most played, forgotten for a while) and **playlists** with their own covers. Everything stays on your computer.
 - **Local music**: create a playlist, press "Link a folder…" and pick a folder. Every audio file in it (and its subfolders: mp3, flac, wav, ogg, opus, m4a, aac, wma) becomes a track with its title, artist, album and cover art from the tags. The playlist is scanned again whenever you open it. Playing such a track from History continues through its playlist.
 
+**Local API** (Settings > API, off by default)
+- Read what is playing from another program, for example a stream overlay or a status bar: `GET http://127.0.0.1:47832/api/v1/now` returns JSON with the state, title, artist, album, year, duration, position and cover address. `/api/v1/events` is a live stream (server-sent events) and `/api/v1/cover` redirects to the cover. Read-only, reachable only from this computer. The full description is in the app.
+
 **Interface**
 - Frosted glass over whatever is behind the window, Silver and Graphite themes, adjustable transparency, tray icon with a track tooltip, media keys, optional start with the system.
 - Self-contained diagnostics: a debug window with a searchable, colour-coded log (Settings > Developer mode).
@@ -106,6 +109,7 @@ Build from a clone whose `origin` points to GitHub: `electron-builder` reads the
 | `src/main/match.js` | pairing the same track across services, grouping versions (pure logic) |
 | `src/main/recommend.js` | Home and similar tracks |
 | `src/main/library.js`, `local.js` | history, playlists, likes, local folders and tags |
+| `src/main/api.js` | the optional local API (now playing) |
 | `src/main/updater.js`, `releases.js` | updates through GitHub Releases |
 | `src/main/server.js` | local server (the YouTube iframe fails with error 153 from `file://`), also serves local files |
 | `src/renderer/engines.js` | playback engines: YouTube IFrame API, SoundCloud Widget API, local audio |

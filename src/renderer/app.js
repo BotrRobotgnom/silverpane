@@ -1482,6 +1482,12 @@
     const n = state.now;
     window.api.player.report({
       hasTrack: !!n,
+      id: n ? n.shown.id : '',
+      source: n ? n.shown.source : '',
+      album: n ? n.shown.album || '' : '',
+      year: n ? n.shown.year || 0 : 0,
+      yearKind: n ? n.shown.yearKind : '',
+      url: n ? n.shown.url || '' : '',
       title: n ? n.shown.title : '',
       artist: n ? n.shown.artist : '',
       cur: state.cur,
@@ -1560,6 +1566,58 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !els.settings.classList.contains('hidden') && $('#changelog').classList.contains('hidden')) closeSettings();
   });
+
+  // ---------- Local API ----------
+  const apiOn = $('#apiOn');
+  const apiPort = $('#apiPort');
+  const apiStatus = $('#apiStatus');
+  const apiUrl = $('#apiUrl');
+  const apiLive = $('#apiLive');
+  const API_DEFAULT = 47832;
+  async function applyApi() {
+    const port = Number(apiPort.value);
+    const valid = Number.isInteger(port) && port >= 1024 && port <= 65535;
+    apiPort.classList.toggle('bad', !valid);
+    apiPort.disabled = false;
+    if (apiOn.checked && !valid) {
+      apiStatus.textContent = t('api.portInvalid');
+      apiStatus.dataset.state = 'error';
+      return;
+    }
+    const r = await window.api.api.configure({ enabled: apiOn.checked, port });
+    apiUrl.textContent = `http://127.0.0.1:${valid ? port : API_DEFAULT}/api/v1/now`;
+    if (!apiOn.checked) {
+      apiStatus.textContent = t('api.off');
+      apiStatus.dataset.state = 'off';
+    } else if (r.ok) {
+      apiStatus.textContent = t('api.listening', { port: r.port });
+      apiStatus.dataset.state = 'ok';
+    } else {
+      apiStatus.textContent = t(r.error === 'busy' ? 'api.busy' : 'api.failed', { port });
+      apiStatus.dataset.state = 'error';
+    }
+  }
+  apiOn.checked = store.get('apiOn', false);
+  apiPort.value = store.get('apiPort', API_DEFAULT);
+  apiOn.addEventListener('change', () => {
+    store.set('apiOn', apiOn.checked);
+    applyApi();
+  });
+  apiPort.addEventListener('change', () => {
+    store.set('apiPort', apiPort.value);
+    applyApi();
+  });
+  $('#apiCopy').addEventListener('click', () => navigator.clipboard?.writeText(apiUrl.textContent).catch(() => {}));
+  $('#apiTry').addEventListener('click', async () => {
+    apiLive.classList.remove('hidden');
+    try {
+      const now = await window.api.api.now();
+      apiLive.textContent = now ? JSON.stringify(now, null, 2) : t('api.tryFailed');
+    } catch {
+      apiLive.textContent = t('api.tryFailed');
+    }
+  });
+  applyApi();
 
   // ---------- Developer mode ----------
   const devMode = $('#devMode');
