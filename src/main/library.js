@@ -44,7 +44,7 @@ function validTrack(track) {
 }
 
 // ---------- A small JSON file store: debounced, atomic writes, survives a corrupt file ----------
-function createStore(fileName, defaults) {
+export function createStore(fileName, defaults) {
   const file = () => path.join(app.getPath('userData'), fileName);
   let data = null;
   let timer = null;

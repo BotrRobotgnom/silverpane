@@ -1454,12 +1454,7 @@
   });
   effectSel.addEventListener('change', () => chooseEffect(effectSel.value, true));
 
-  theme.value = store.get('theme', 'silver');
-  root.dataset.theme = theme.value;
-  theme.addEventListener('change', () => {
-    root.dataset.theme = theme.value;
-    store.set('theme', theme.value);
-  });
+  // the theme itself is chosen and applied in themes-ui.js
 
   // Tray: what closing the window does, the labels of the tray menu, and the track info it shows
   const closeToTray = $('#closeToTray');

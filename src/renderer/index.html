@@ -82,6 +82,7 @@
           <nav class="st-nav" aria-label="Settings sections">
             <button type="button" class="on" data-page="general" data-i18n="settings.general">General</button>
             <button type="button" data-page="appearance" data-i18n="settings.appearance">Appearance</button>
+            <button type="button" data-page="themes" data-i18n="settings.themes">Themes</button>
             <button type="button" data-page="updates" data-i18n="settings.updates">Updates</button>
             <button type="button" data-page="developer" data-i18n="settings.developer">Developer</button>
             <button type="button" data-page="api" data-i18n="settings.api">API</button>
@@ -119,8 +120,6 @@
               <div class="st-row">
                 <span class="st-text"><b data-i18n="settings.theme">Theme</b></span>
                 <select id="theme">
-                  <option value="silver" data-i18n="theme.silver">Silver</option>
-                  <option value="graphite" data-i18n="theme.graphite">Graphite</option>
                 </select>
               </div>
               <div class="st-row">
@@ -132,6 +131,8 @@
                 <span class="st-slider"><input id="transparency" type="range" min="0" max="60" value="30" /><output id="transparencyVal">30%</output></span>
               </div>
             </div>
+
+            <div class="st-page hidden" data-page="themes" id="thPage"></div>
 
             <div class="st-page hidden" data-page="updates">
               <div class="st-row">
@@ -371,7 +372,9 @@ es.addEventListener('now', (e) => {
   <script src="locales/en.js"></script>
   <script src="i18n.js"></script>
   <script src="engines.js"></script>
+  <script src="theme.js"></script>
   <script src="app.js"></script>
+  <script src="themes-ui.js"></script>
   <script src="library.js"></script>
   <script src="changelog.js"></script>
   <script src="home.js"></script>

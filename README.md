@@ -57,7 +57,7 @@ npm start
 - Read what is playing from another program, for example a stream overlay or a status bar: `GET http://127.0.0.1:47832/api/v1/now` returns JSON with the state, title, artist, album, year, duration, position and cover address. `/api/v1/events` is a live stream (server-sent events) and `/api/v1/cover` redirects to the cover. Read-only, reachable only from this computer. The full description is in the app.
 
 **Interface**
-- Frosted glass over whatever is behind the window, Silver and Graphite themes, adjustable transparency, tray icon with a track tooltip, media keys, optional start with the system.
+- Frosted glass over whatever is behind the window, **custom themes** (colours, one background picture for every page, corner radius, font, layout; share them as files; export the colours to Figma as variables), Silver and Graphite as the built-in ones, adjustable transparency, tray icon with a track tooltip, media keys, optional start with the system.
 - Self-contained diagnostics: a debug window with a searchable, colour-coded log (Settings > Developer mode).
 - Updates: installed builds update themselves from GitHub Releases. Pre-releases are available only if you switch them on.
 
@@ -80,7 +80,7 @@ On Windows the blur is drawn by the system, and [Microsoft documents](https://le
 
 ## Your data
 
-Stored locally in the app data folder: `%APPDATA%\Silverpane` on Windows, `~/.config/Silverpane` on Linux. (Versions called "Glass Player" used a folder of that name; it is moved automatically on the first start.) It contains `history.json`, `playlists.json`, `reactions.json`, `blocked.json` and `covers/`. Each file has a `.bak` copy, and a damaged file is restored from it. Back the folder up or copy it to another PC to move your library.
+Stored locally in the app data folder: `%APPDATA%\Silverpane` on Windows, `~/.config/Silverpane` on Linux. (Versions called "Glass Player" used a folder of that name; it is moved automatically on the first start.) It contains `history.json`, `playlists.json`, `reactions.json`, `blocked.json`, `themes.json` and `covers/`. Each file has a `.bak` copy, and a damaged file is restored from it. Back the folder up or copy it to another PC to move your library.
 
 Logs are in `logs/silverpane.log` there (rotated at 2 MB).
 
@@ -109,6 +109,7 @@ Build from a clone whose `origin` points to GitHub: `electron-builder` reads the
 | `src/main/match.js` | pairing the same track across services, grouping versions (pure logic) |
 | `src/main/recommend.js` | Home and similar tracks |
 | `src/main/library.js`, `local.js` | history, playlists, likes, local folders and tags |
+| `src/renderer/theme.js`, `themes-ui.js`, `src/main/themes.js` | theme engine, the Themes settings page, theme files |
 | `src/main/api.js` | the optional local API (now playing) |
 | `src/main/updater.js`, `releases.js` | updates through GitHub Releases |
 | `src/main/server.js` | local server (the YouTube iframe fails with error 153 from `file://`), also serves local files |

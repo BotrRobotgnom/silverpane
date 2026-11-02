@@ -59,6 +59,13 @@ contextBridge.exposeInMainWorld('api', {
   debug: {
     open: () => ipcRenderer.invoke('debug:open'),
   },
+  themes: {
+    list: () => ipcRenderer.invoke('themes:list'),
+    save: (theme) => ipcRenderer.invoke('themes:save', theme),
+    remove: (id) => ipcRenderer.invoke('themes:remove', id),
+    importFile: () => ipcRenderer.invoke('themes:import'),
+    exportFile: (name, text) => ipcRenderer.invoke('themes:export', name, text),
+  },
   api: {
     configure: (cfg) => ipcRenderer.invoke('api:configure', cfg),
     now: () => ipcRenderer.invoke('api:now'),

@@ -4,6 +4,16 @@ The version scheme is described in [VERSIONING.md](VERSIONING.md).
 Each version has `### Added`, `### Changed` and `### Fixed` parts (only the ones that apply).
 The release notes on GitHub are built from this file automatically (see `scripts/release-notes.mjs`).
 
+## 1.3.0
+
+### Added
+- **Custom themes** (Settings > Themes). Make your own copy of Silver or Graphite and change it with a live preview: 13 colours (text, accent, the three colours of the window gradient, cards, borders, menus and more), corner radius, glass blur, font, **one background picture for every page** (with visibility and blur), cover size in lists, list density, the width of the track panel and which side it is on. The quick switch in Appearance lists all your themes.
+- **Share a theme as a file**: Export and Import in Settings > Themes. A theme is one JSON file with everything in it, the picture included. Imported files are checked, and only known settings with valid values are used.
+- **Export for Figma**: the colours and sizes of a theme as variables in the Tokens Studio format (the plugin for Figma). Change them in Figma, export the file from there and import it back into Silverpane.
+
+### Changed
+- The theme is now a set of values that the whole interface refers to, so a change in one place (the background, the accent, the radius) reaches every page.
+
 ## 1.2.0
 
 ### Added

@@ -22,6 +22,7 @@ import { getHome, getSimilar, resetCache } from './recommend.js';
 import * as autostart from './autostart.js';
 import * as trayIcon from './tray.js';
 import * as api from './api.js';
+import * as themes from './themes.js';
 import { registerDebugIpc, openDebugWindow, closeDebugWindow } from './debugWindow.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -324,6 +325,12 @@ ipcMain.on('player:state', (_e, info) => {
   trayIcon.setNowPlaying(info);
   api.setNow(info);
 });
+// Themes: custom ones live in themes.json, files are imported and exported through the system dialogs
+ipcMain.handle('themes:list', () => themes.list());
+ipcMain.handle('themes:save', (_e, theme) => themes.save(theme));
+ipcMain.handle('themes:remove', (_e, id) => themes.remove(String(id)));
+ipcMain.handle('themes:import', () => themes.importFile(win));
+ipcMain.handle('themes:export', (_e, name, text) => themes.exportFile(win, name, text));
 // The local API: the page sends its settings at start and when they change
 ipcMain.handle('api:now', () => (api.isOn() ? api.snapshot() : null)); // the "Try" button: the page may not call the API itself (its security policy)
 ipcMain.handle('api:configure', (_e, cfg) => api.configure({ enabled: !!cfg?.enabled, port: Number(cfg?.port) }));
@@ -568,6 +575,7 @@ if (!app.requestSingleInstanceLock()) {
 
 app.on('before-quit', () => {
   api.stop();
+  themes.flush();
   trayIcon.markQuitting();
   library.flushLibrary();
 });
