@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { startServer } from './server.js';
 import { MIME as AUDIO_MIME, readCover } from './local.js';
 import {
-  searchYouTube, suggestYouTube, extractVideoId, getYouTubeTrack, markEmbeddable, isEmbeddable, knownEmbeddable, searchYouTubeCollections, getYouTubeArtist, getYouTubePlaylist,
+  searchYouTube, suggestYouTube, extractVideoId, getYouTubeTrack, markEmbeddable, isEmbeddable, knownEmbeddable, applyYears, yearsFor, searchYouTubeCollections, getYouTubeArtist, getYouTubePlaylist,
   findYouTubeArtist, findYouTubeAlbum,
 } from './youtube.js';
 import {
@@ -256,6 +256,15 @@ ipcMain.handle('embed:check', async (_e, ids) => {
   await Promise.all(list.map(async (id) => (out[id] = await isEmbeddable(id))));
   return out;
 });
+// Years of YouTube videos (cached; the ones not known yet are asked for once)
+ipcMain.handle('years:get', async (_e, ids) => {
+  const list = (Array.isArray(ids) ? ids : []).map(String).slice(0, 12);
+  if (process.env.GP_TEST) {
+    await new Promise((r) => setTimeout(r, 200));
+    return Object.fromEntries(list.filter((id) => !id.startsWith('NOY')).map((id, i) => [id, { year: 2010 + (i % 12), yearKind: 'upload' }]));
+  }
+  return yearsFor(list);
+});
 ipcMain.handle('reactions:set', (_e, track, value, pair) => {
   const v = library.setReaction(track, Number(value) || 0, pair);
   resetCache();
@@ -365,6 +374,7 @@ ipcMain.handle('search', async (_e, { query, sources }) => {
       const k = knownEmbeddable(tr.id);
       if (k !== undefined) tr.embeddable = k;
     }
+    applyYears(out.youtube);
     out.merged = mergeResults(q, out.youtube, out.soundcloud);
     const ms = Date.now() - started;
     const failed = Object.keys(out.errors);
@@ -494,6 +504,7 @@ ipcMain.handle('versions:get', async (_e, track) => {
         if (k !== undefined) v.embeddable = k;
       }
     }
+    applyYears(found);
     logger.info('versions', `Versions of "${track.title}": ${found.length}`, { query: q });
     if (versionCache.size > 100) versionCache.clear();
     versionCache.set(ck, found);

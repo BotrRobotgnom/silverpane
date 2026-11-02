@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import * as logger from './logger.js';
+import { yearOf } from './year.js';
 
 export const AUDIO_EXT = new Set(['.mp3', '.flac', '.wav', '.ogg', '.oga', '.opus', '.m4a', '.aac', '.wma', '.webm', '.mka']);
 export const MIME = {
@@ -53,6 +54,11 @@ export async function readTrack(file) {
     track.album = c.album || '';
     track.genre = (c.genre && c.genre[0]) || '';
     track.durationSec = Math.round(meta.format.duration || 0);
+    const y = yearOf(c.year || c.date || c.originaldate);
+    if (y) {
+      track.year = y;
+      track.yearKind = 'release'; // the tag holds the release year
+    }
     if (c.picture && c.picture.length) track.cover = `/local/cover/${track.id}`;
   } catch (err) {
     logger.debug('local', `No tags in ${base}`, { error: err.message });

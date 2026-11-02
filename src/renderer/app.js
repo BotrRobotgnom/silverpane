@@ -184,6 +184,16 @@
     return out;
   }
 
+  // The year of a track: a release year when the service says so, otherwise the year it was uploaded (the tooltip tells which)
+  function yearMark(track, cls = 'yr') {
+    if (!track || !track.year) return null;
+    const el = document.createElement('span');
+    el.className = cls;
+    el.textContent = String(track.year);
+    el.title = t(track.yearKind === 'release' ? 'year.release' : 'year.upload');
+    return el;
+  }
+
   // ---------- Likes ----------
   const keyOf = (x) => x.source + ':' + x.id;
   const reactionOf = (track) => {
@@ -272,6 +282,8 @@
     sub.className = 'sub';
     if (subText !== undefined) sub.textContent = subText;
     else sub.append(...artistParts(track));
+    const yr = yearMark(track);
+    if (yr) sub.append(document.createTextNode(sub.childNodes.length ? ' · ' : ''), yr);
     meta.append(title, sub);
     row.appendChild(meta);
 
@@ -477,6 +489,19 @@
         v.embeddable = verdict[v.id];
       }
       if (changed) renderResults();
+      // years come from the same YouTube answer, so they are cached by now
+      try {
+        const years = await window.api.yearsOf(batch.map((v) => v.id));
+        if (id !== searchId) return;
+        let got = false;
+        for (const v of batch) {
+          if (years[v.id] && !v.year) {
+            Object.assign(v, years[v.id]);
+            got = true;
+          }
+        }
+        if (got) renderResults();
+      } catch {}
     }
   }
 
@@ -986,10 +1011,25 @@
     const src = [n.shown, n.sc, n.yt].filter(Boolean).find((x) => x.genre || (x.tags && x.tags.length));
     const words = [];
     if (src) for (const w of [src.genre, ...(src.tags || [])]) if (w && !words.some((x) => x.toLowerCase() === w.toLowerCase())) words.push(w);
+    const yr = yearMark(n.shown, 'tag year');
     els.npTags.replaceChildren(
+      ...(yr ? [yr] : []),
       ...words.slice(0, 8).map((w) => Object.assign(document.createElement('span'), { className: 'tag', textContent: w })),
     );
-    els.npTags.classList.toggle('hidden', !words.length);
+    els.npTags.classList.toggle('hidden', !words.length && !yr);
+    // a YouTube video has no year until YouTube has been asked: fetch it once and show it when it arrives
+    if (!n.shown.year && n.shown.source === 'youtube' && window.api.yearsOf) {
+      const key = n.shown.source + ':' + n.shown.id;
+      window.api
+        .yearsOf([n.shown.id])
+        .then((r) => {
+          const y = r && r[n.shown.id];
+          if (!y) return;
+          Object.assign(n.shown, y);
+          if (key === shownKey) showTags(n);
+        })
+        .catch(() => {});
+    }
   }
 
   // Remixes, slowed and other uploads of the current track, from both services

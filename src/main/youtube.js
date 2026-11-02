@@ -1,4 +1,5 @@
-import { isKnownBlocked, isKnownEmbeddable, markBlocked, markEmbeddableOk } from './library.js';
+import { isKnownBlocked, isKnownEmbeddable, markBlocked, markEmbeddableOk, rememberYear, knownYear } from './library.js';
+import { yearOf } from './year.js';
 import { Innertube } from 'youtubei.js';
 import * as logger from './logger.js';
 
@@ -228,7 +229,12 @@ async function playerSaysEmbeddable(videoId) {
     try {
       const yt = await getYT();
       const res = await yt.actions.execute('/player', { videoId, racyCheckOk: true, contentCheckOk: true, parse: false, ...(client ? { client } : {}) });
-      return res?.data?.playabilityStatus || null;
+      const data = res?.data;
+      // the publish date rides along for free: it becomes the year shown next to the track
+      const micro = data?.microformat?.playerMicroformatRenderer;
+      const year = yearOf(micro?.publishDate || micro?.uploadDate);
+      if (year) rememberYear(videoId, year);
+      return data?.playabilityStatus || null;
     } catch (err) {
       logger.debug('youtube', `Player check failed for ${videoId}`, { client: client || 'WEB', error: err.message });
       return null;
@@ -286,7 +292,46 @@ export async function isEmbeddable(videoId) {
 
 export async function markEmbeddable(tracks) {
   await Promise.all(tracks.map(async (tr) => (tr.embeddable = await isEmbeddable(tr.id))));
+  applyYears(tracks);
   return tracks;
+}
+
+// YouTube has no "release year" for a video, only the day it was published: marked as an upload year
+export function applyYears(tracks) {
+  for (const tr of tracks) {
+    if (tr.source !== 'youtube' || tr.year) continue;
+    const y = knownYear(tr.id);
+    if (y) {
+      tr.year = y;
+      tr.yearKind = 'upload';
+    }
+  }
+  return tracks;
+}
+
+// { id: { year, yearKind } } for videos whose year is known; asks YouTube for the ones that are not (once, then it is cached)
+export async function yearsFor(ids) {
+  const out = {};
+  await Promise.all(
+    ids.map(async (id) => {
+      let y = knownYear(id);
+      if (!y) {
+        await limited(async () => {
+          try {
+            const yt = await getYT();
+            const res = await yt.actions.execute('/player', { videoId: id, racyCheckOk: true, contentCheckOk: true, parse: false });
+            const micro = res?.data?.microformat?.playerMicroformatRenderer;
+            rememberYear(id, yearOf(micro?.publishDate || micro?.uploadDate));
+          } catch (err) {
+            logger.debug('youtube', `Year lookup failed for ${id}`, { error: err.message });
+          }
+        });
+        y = knownYear(id);
+      }
+      if (y) out[id] = { year: y, yearKind: 'upload' };
+    }),
+  );
+  return out;
 }
 
 // ---------- Artists, albums and playlists ----------

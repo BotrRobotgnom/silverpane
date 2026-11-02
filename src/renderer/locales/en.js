@@ -144,6 +144,8 @@ window.__locales.en = {
   'toast.disliked': "Won't recommend this again",
   'plat.ytBlocked': "YouTube doesn't allow playing this video outside YouTube",
   'plat.local': 'Local file',
+  'year.release': 'Release year',
+  'year.upload': 'Upload year (the service does not give a release date)',
   'playlist.folder': 'Folder with music',
   'playlist.linkFolder': 'Link a folder…',
   'playlist.changeFolder': 'Change folder…',

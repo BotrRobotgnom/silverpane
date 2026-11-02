@@ -4,6 +4,11 @@ The version scheme is described in [VERSIONING.md](VERSIONING.md).
 Each version has `### Added`, `### Changed` and `### Fixed` parts (only the ones that apply).
 The release notes on GitHub are built from this file automatically (see `scripts/release-notes.mjs`).
 
+## 1.1.0
+
+### Added
+- **Year of a track.** Lists (search, versions, playlists, history) show the year after the artist ("Artist · 2019"), and the track panel has a year chip next to the tags. SoundCloud gives the release date when the artist entered one, otherwise the upload date; for YouTube it is the year the video was published; for local files it is the year from the tags. Hover the year to see which kind it is (release or upload). A date that is missing or not believable is simply not shown.
+
 ## 1.0.0
 
 The first official release.

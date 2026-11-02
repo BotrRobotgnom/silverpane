@@ -38,6 +38,7 @@ npm start
 - Paste a link to a YouTube track or to a SoundCloud track, playlist or artist.
 - **Other versions**: remixes, slowed, sped up, live, covers and other uploads of a song sit in a framed block under the result (the first five, expandable) instead of cluttering the list. Songs with the same title by different artists are kept apart.
 - **Service priority**: a three-position switch (YouTube, SoundCloud, none). When a track exists on both, the preferred one plays, and a button in the track panel switches to the other. If one service refuses to play a track, the other is tried automatically.
+- The year of each track next to the artist (release year when the service gives it, otherwise the upload year; hover to see which).
 - Videos that forbid embedding are hidden or greyed out, checked before you press play.
 
 **Recommendations**

@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import * as logger from './logger.js';
+import { yearOf } from './year.js';
 import { scanFolder, isAudioFile } from './local.js';
 
 const LOG_LIMIT = 5000; // chronological "recently played" entries; the per-track stats are never trimmed
@@ -32,6 +33,7 @@ function slim(track) {
     cover: typeof track.cover === 'string' ? track.cover.slice(0, 600) : '',
     url: typeof track.url === 'string' ? track.url.slice(0, 600) : '',
     hasVideo: !!track.hasVideo,
+    ...(yearOf(track.year) ? { year: yearOf(track.year), yearKind: track.yearKind === 'release' ? 'release' : 'upload' } : {}),
     // a file on this computer: where it is, and the playlist (linked folder) it came from
     ...(track.source === 'local' ? { path: String(track.path || '').slice(0, 1000), playlistId: String(track.playlistId || '').slice(0, 60) } : {}),
   };
@@ -196,6 +198,20 @@ export const isKnownEmbeddable = (videoId) => {
   return !!at && Date.now() - at < OK_TTL;
 };
 export const isKnownBlocked = (videoId) => !!blockedStore.load().ids[videoId];
+
+// upload years of YouTube videos (they come with the same /player answer as the embeddability check)
+export function rememberYear(videoId, year) {
+  const y = yearOf(year);
+  if (!videoId || !y) return;
+  const b = blockedStore.load();
+  if (!b.years) b.years = {};
+  if (b.years[videoId] === y) return;
+  b.years[videoId] = y;
+  const keys = Object.keys(b.years);
+  if (keys.length > 6000) for (const k of keys.slice(0, 2000)) delete b.years[k]; // oldest first (insertion order)
+  blockedStore.changed();
+}
+export const knownYear = (videoId) => blockedStore.load().years?.[videoId] || 0;
 
 // ---------- History ----------
 export function recordPlay(track, seconds) {

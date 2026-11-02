@@ -624,6 +624,8 @@ input[type='range']::-webkit-slider-thumb {
 
 /* genre / tags and other versions in the now-playing panel */
 .np-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.sub .yr { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.np-tags .tag.year { color: var(--text); font-variant-numeric: tabular-nums; }
 .np-tags .tag { padding: 1px 8px; border-radius: 999px; font-size: 11px; color: var(--text-dim); background: var(--card); border: 1px solid var(--card-edge); }
 .np-versions { margin-top: 10px; }
 .np-versions .row { grid-template-columns: 36px minmax(0, 1fr) auto auto; padding: 4px 6px; }

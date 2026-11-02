@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('api', {
   },
   versions: (track) => ipcRenderer.invoke('versions:get', track),
   checkEmbeddable: (ids) => ipcRenderer.invoke('embed:check', ids),
+  yearsOf: (ids) => ipcRenderer.invoke('years:get', ids),
   markBlocked: (videoId) => ipcRenderer.invoke('blocked:mark', videoId),
   history: {
     record: (track, seconds) => ipcRenderer.invoke('history:record', track, seconds),

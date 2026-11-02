@@ -1,6 +1,7 @@
 // SoundCloud without an official API key: we take the public client_id from the site's scripts,
 // the same way SoundCloud's own web player does. If SoundCloud changes its site, this is what breaks.
 import * as logger from './logger.js';
+import { soundcloudYear } from './year.js';
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
@@ -84,6 +85,7 @@ function toTrack(t) {
     durationSec: Math.round((t.full_duration || t.duration || 0) / 1000),
     cover: (t.artwork_url || t.user?.avatar_url || '').replace('-large', '-t500x500'),
     url: t.permalink_url,
+    ...soundcloudYear(t),
   };
 }
 
