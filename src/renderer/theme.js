@@ -159,6 +159,8 @@
       style.setProperty('--bg-blur', bg.blur + 'px');
       style.setProperty('--bg-scale', bg.blur ? '1.08' : '1');
     }
+    // the layers of a theme folder (they are not part of the checked theme: the main process vouches for them)
+    if (root === document.documentElement && window.BgLayers) window.BgLayers.set(theme && theme.layers);
     return th;
   }
 

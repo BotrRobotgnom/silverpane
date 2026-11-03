@@ -1,0 +1,12 @@
+{
+  "02-stars-drift.svg": {
+    "drift": 12,
+    "period": 60,
+    "opacity": 90
+  },
+  "04-glow-scroll.png": {
+    "scroll": 40,
+    "blend": "screen",
+    "opacity": 85
+  }
+}

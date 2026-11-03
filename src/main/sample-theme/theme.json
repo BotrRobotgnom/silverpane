@@ -1,0 +1,21 @@
+{
+  "format": "silverpane-theme",
+  "version": 1,
+  "name": "Example theme",
+  "base": "graphite",
+  "colors": {
+    "accent": "#ff9f43",
+    "panelFrom": "#2a2250",
+    "panelMid": "#1b1838",
+    "panelTo": "#0f0d22",
+    "card": "rgba(255, 255, 255, 0.08)"
+  },
+  "shape": {
+    "radius": 18,
+    "blur": 18,
+    "thumb": 48,
+    "density": "normal",
+    "npSide": "right",
+    "font": "system"
+  }
+}

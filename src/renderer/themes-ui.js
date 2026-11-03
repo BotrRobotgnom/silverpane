@@ -14,14 +14,18 @@
     return node;
   };
 
-  let customs = []; // checked custom themes
+  let customs = []; // checked custom themes (stored by the app)
+  let folders = []; // themes found in the themes folder (read-only here)
+  let themesDir = '';
+  let foldersSig = '';
   let cur = T.builtin('silver'); // the theme in use (an object from the list, edited in place when custom)
   const page = $('#thPage');
   const picker = $('#theme'); // the quick switch on the Appearance page
   let saveTimer = null;
 
-  const all = () => [T.builtin('silver'), T.builtin('graphite'), ...customs];
+  const all = () => [T.builtin('silver'), T.builtin('graphite'), ...customs, ...folders];
   const isCustom = () => cur.id.startsWith('custom:');
+  const isFolder = () => cur.id.startsWith('folder:') || cur.id.startsWith('file:');
   const label = (th) => (th.id === 'silver' ? t('theme.silver') : th.id === 'graphite' ? t('theme.graphite') : th.name);
 
   function persist() {
@@ -45,6 +49,47 @@
       }),
     );
     picker.value = cur.id;
+  }
+
+  // Themes found in the themes folder: a folder with theme.json and background/, or a loose .json file
+  async function scanFolders() {
+    let res;
+    try {
+      res = await api.themes.scan();
+    } catch {
+      return false;
+    }
+    themesDir = res.dir || '';
+    const found = [];
+    for (const item of res.items || []) {
+      const parsed = item.json ? T.fromFile(item.json) : null;
+      if (item.kind === 'file' && !parsed) continue; // a stray .json that is not a theme
+      const th = parsed || T.sanitize({}, item.name);
+      th.id = item.id;
+      th.name = parsed && parsed.name !== 'Imported theme' ? parsed.name : item.name.slice(0, 40);
+      th.source = item.kind;
+      th.badJson = item.kind === 'folder' && item.json !== null && !parsed;
+      th.layers = window.BgLayers.normalize(item.layers, item.manifest);
+      found.push(th);
+    }
+    const sig = JSON.stringify(found.map((x) => [x.id, x.name, x.layers.map((l) => l.url), x.colors, x.shape, x.base]));
+    const same = sig === foldersSig;
+    foldersSig = sig;
+    folders = found;
+    return !same;
+  }
+
+  // Look at the folder again, keep the chosen theme (and redraw it if its files changed)
+  async function refresh(quiet) {
+    const changedNow = await scanFolders();
+    const again = all().find((x) => x.id === cur.id);
+    if (!again) return select('silver');
+    if (changedNow || !quiet) {
+      cur = again;
+      T.apply(cur);
+      fillPicker();
+      render();
+    }
   }
 
   function select(id) {
@@ -185,8 +230,53 @@
     acts.append(button(t('themes.duplicate'), duplicate, 'swap primary'));
     if (custom) acts.append(button(t('themes.delete'), remove));
     top.append(acts);
-    if (!custom) top.append(el('p', 'hint', t('themes.builtinHint')));
+    if (isFolder()) top.append(el('p', 'hint', t(cur.badJson ? 'themes.badJson' : 'themes.folderHint')));
+    else if (!custom) top.append(el('p', 'hint', t('themes.builtinHint')));
+    if (cur.layers && cur.layers.length) top.append(el('p', 'hint', t('themes.layersCount', { count: cur.layers.length })));
     page.append(top);
+
+    // where the themes live
+    const where = section(t('themes.folder'), t('themes.folderIntro'));
+    where.append(el('code', 'th-path', themesDir));
+    const fb = el('div', 'st-btns th-acts');
+    fb.append(
+      button(t('themes.openFolder'), async () => {
+        const r = await api.themes.openFolder();
+        if (r && r.error) GP.toast(t('themes.openFailed'));
+      }, 'swap primary'),
+      button(t('themes.refresh'), async () => {
+        await refresh(false);
+        GP.toast(t('themes.refreshed', { count: folders.length }));
+      }),
+      button(t('themes.example'), createExample),
+    );
+    where.append(fb);
+    const docs = el('details', 'th-docs');
+    docs.append(el('summary', '', t('themes.docs')));
+    docs.append(
+      Object.assign(el('pre', 'api-code'), {
+        textContent: `${themesDir || 'themes'}/
+  Night city/                 ${t('themes.tree.folder')}
+    theme.json                ${t('themes.tree.json')}
+    background/               ${t('themes.tree.bg')}
+      01-sky.jpg              ${t('themes.tree.bottom')}
+      02-stars-drift.svg      ${t('themes.tree.drift')}
+      03-clouds-parallax.png  ${t('themes.tree.parallax')}
+      04-glow-scroll.png      ${t('themes.tree.scroll')}
+      layers.json             ${t('themes.tree.layers')}
+  Another.json                ${t('themes.tree.loose')}`,
+      }),
+    );
+    const list = el('ul', 'api-list');
+    for (const k of ['rule1', 'rule2', 'rule3', 'rule4', 'rule5']) list.append(el('li', '', t('themes.' + k)));
+    docs.append(list);
+    docs.append(
+      Object.assign(el('pre', 'api-code'), {
+        textContent: `{\n  "02-stars-drift.svg": { "drift": 12, "period": 60, "opacity": 90 },\n  "04-glow-scroll.png": { "scroll": 40, "blend": "screen" }\n}`,
+      }),
+    );
+    where.append(docs);
+    page.append(where);
 
     // everything below changes the theme, so it is locked for the built-in ones
     const editor = el('div', 'th-editor' + (custom ? '' : ' locked'));
@@ -264,6 +354,17 @@
     }
     editor.append(bg);
 
+    const motion = section(t('themes.motion'), t('themes.motionHint'));
+    const sw = el('input', 'switch');
+    sw.type = 'checkbox';
+    sw.checked = GP.store.get('bgAnimate', true);
+    sw.addEventListener('change', () => {
+      GP.store.set('bgAnimate', sw.checked);
+      window.BgLayers.setAnimated(sw.checked);
+    });
+    motion.append(row(t('themes.animate'), sw));
+    page.append(motion);
+
     const sh = cur.shape;
     const shape = section(t('themes.shape'));
     shape.append(row(t('themes.radius'), slider({ min: T.RANGES.radius[0], max: T.RANGES.radius[1], value: sh.radius, format: (v) => v + 'px', onInput: (v) => ((sh.radius = v), changed()) })));
@@ -291,7 +392,7 @@
     // sharing
     const share = section(t('themes.share'), t('themes.shareHint'));
     const sb = el('div', 'st-btns th-acts');
-    sb.append(button(t('themes.import'), importTheme), button(t('themes.export'), exportTheme), button(t('themes.exportFigma'), exportFigma));
+    sb.append(button(t('themes.import'), importTheme), button(t('themes.importFolder'), importFolder), button(t('themes.export'), exportTheme), button(t('themes.exportFigma'), exportFigma));
     share.append(sb, el('p', 'hint', t('themes.figmaHint')));
     page.append(share);
   }
@@ -307,8 +408,9 @@
   async function duplicate() {
     const copy = T.sanitize(JSON.parse(JSON.stringify(cur)));
     copy.name = (label(cur) + ' ' + t('themes.copy')).slice(0, 40);
+    const hadLayers = !!(cur.layers && cur.layers.length);
     await adopt(copy);
-    GP.toast(t('themes.duplicated'));
+    GP.toast(t(hadLayers ? 'themes.duplicatedNoLayers' : 'themes.duplicated'));
   }
 
   async function remove() {
@@ -331,6 +433,28 @@
     GP.toast(t('themes.imported', { name: theme.name }));
   }
 
+  async function importFolder() {
+    const r = await api.themes.importFolder();
+    if (!r) return;
+    if (r.error) {
+      GP.toast(t('themes.folderErr.' + r.error));
+      return;
+    }
+    await scanFolders();
+    select(r.id);
+    GP.toast(t('themes.imported', { name: cur.name }));
+  }
+
+  async function createExample() {
+    const r = await api.themes.example();
+    if (!r || r.error) {
+      GP.toast(t('themes.folderErr.read'));
+      return;
+    }
+    await scanFolders();
+    select(r.id);
+  }
+
   async function exportTheme() {
     const where = await api.themes.exportFile(label(cur), T.toFile(cur));
     if (where) GP.toast(t('themes.exported'));
@@ -350,6 +474,13 @@
     } catch {
       customs = [];
     }
+    await scanFolders();
+    window.BgLayers.setAnimated(GP.store.get('bgAnimate', true));
     select(GP.store.get('theme', 'silver'));
   })();
+
+  // Files may have been added to the folder meanwhile: look again when the window gets focus on this page
+  window.addEventListener('focus', () => {
+    if (!page.classList.contains('hidden') && !$('#settings').classList.contains('hidden')) refresh(true);
+  });
 })();

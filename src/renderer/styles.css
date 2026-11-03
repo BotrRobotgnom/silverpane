@@ -682,3 +682,14 @@ input[type='range']::-webkit-slider-thumb {
 .th-color input[type='color'] { width: 38px; height: 28px; padding: 0; border: 1px solid var(--card-edge); border-radius: 8px; background: transparent; cursor: pointer; flex: none; }
 .th-color input[type='range'] { width: 100%; }
 .th-preview { height: 90px; margin: 6px 0; border-radius: var(--radius); background: center / cover no-repeat; border: 1px solid var(--card-edge); }
+
+/* background layers of a theme folder (layers.js) */
+#bgLayers { position: absolute; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
+.bgl { position: absolute; will-change: transform; }
+.bgl-in { position: absolute; inset: 0; will-change: transform; }
+.bgl-media { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-drag: none; }
+
+.th-path { display: block; padding: 6px 10px; margin: 6px 0 0; border-radius: 10px; background: var(--track); font-size: 12px; overflow-wrap: anywhere; user-select: text; }
+.th-docs { margin: 4px 0 8px; }
+.th-docs summary { cursor: pointer; padding: 6px 0; color: var(--accent); font-weight: 600; }
+.th-docs .api-code { white-space: pre; }

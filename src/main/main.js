@@ -131,6 +131,7 @@ async function createWindow() {
     path: (id) => library.findLocalPath(id),
     mime: (file) => AUDIO_MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
     cover: readCover,
+    theme: themes.resolveAsset,
   });
   origin = `http://127.0.0.1:${port}`;
   api.setLocalOrigin(origin);
@@ -330,6 +331,10 @@ ipcMain.handle('themes:list', () => themes.list());
 ipcMain.handle('themes:save', (_e, theme) => themes.save(theme));
 ipcMain.handle('themes:remove', (_e, id) => themes.remove(String(id)));
 ipcMain.handle('themes:import', () => themes.importFile(win));
+ipcMain.handle('themes:scan', () => themes.scan());
+ipcMain.handle('themes:openFolder', () => themes.openFolder());
+ipcMain.handle('themes:importFolder', () => themes.importFolder(win));
+ipcMain.handle('themes:example', () => themes.createExample());
 ipcMain.handle('themes:export', (_e, name, text) => themes.exportFile(win, name, text));
 // The local API: the page sends its settings at start and when they change
 ipcMain.handle('api:now', () => (api.isOn() ? api.snapshot() : null)); // the "Try" button: the page may not call the API itself (its security policy)

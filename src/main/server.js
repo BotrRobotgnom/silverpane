@@ -41,6 +41,11 @@ async function serveLocal(local, urlPath, req, res) {
     else res.writeHead(200, { 'Content-Type': cover.type, 'Cache-Control': 'max-age=3600' }).end(cover.data);
     return;
   }
+  await streamFile(file, local.mime(file), req, res);
+}
+
+// A file with Range support (seeking in audio and video needs it)
+async function streamFile(file, type, req, res) {
   let stat;
   try {
     stat = await fs.stat(file);
@@ -48,7 +53,6 @@ async function serveLocal(local, urlPath, req, res) {
     res.writeHead(404).end('File is gone');
     return;
   }
-  const type = local.mime(file);
   const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
   let start = 0;
   let end = stat.size - 1;
@@ -84,6 +88,13 @@ export async function startServer(rootDir, preferredPort = 47831, local = null) 
       const urlPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
       if (local && urlPath.startsWith('/local/')) {
         await serveLocal(local, urlPath, req, res);
+        return;
+      }
+      // pictures and videos of a theme folder: /theme/<folder>/background/<file>
+      if (local && local.theme && urlPath.startsWith('/theme/')) {
+        const found = await local.theme(urlPath.slice('/theme/'.length));
+        if (!found) res.writeHead(404).end('Not found');
+        else await streamFile(found.file, found.type, req, res);
         return;
       }
       const rel = urlPath === '/' ? 'index.html' : urlPath.replace(/^\/+/, '');

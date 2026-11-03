@@ -4,6 +4,14 @@ The version scheme is described in [VERSIONING.md](VERSIONING.md).
 Each version has `### Added`, `### Changed` and `### Fixed` parts (only the ones that apply).
 The release notes on GitHub are built from this file automatically (see `scripts/release-notes.mjs`).
 
+## 1.4.0
+
+### Added
+- **Themes folder.** Settings > Themes shows where it is and has "Open the folder", "Refresh", "Import folder…" and "Import file…". A theme can be a folder or a loose `.json` file dropped there. "Create an example theme" adds a ready one.
+- **Background layers by name.** In a theme folder, every picture or video in `background/` is a layer, stacked by file name. Replace a file with another of the same name and that layer changes. Layers can be png, jpg, webp, gif, svg, avif, mp4 or webm, and animated ones play.
+- **Moving backgrounds**: a layer can follow the mouse (parallax), drift slowly, or react to the mouse wheel. The motion is set by a word in the file name (`parallax`, `drift`, `scroll`, and `screen` or `overlay` for blending) or by a `layers.json` file. "Animate backgrounds" switches all of it off, and everything pauses while the window is hidden.
+- The rules and the Figma way of working are in `THEMES.md` and in the app (Settings > Themes > "How to make a theme folder").
+
 ## 1.3.0
 
 ### Added
