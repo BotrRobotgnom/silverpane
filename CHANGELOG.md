@@ -4,6 +4,16 @@ The version scheme is described in [VERSIONING.md](VERSIONING.md).
 Each version has `### Added`, `### Changed` and `### Fixed` parts (only the ones that apply).
 The release notes on GitHub are built from this file automatically (see `scripts/release-notes.mjs`).
 
+## 1.5.0
+
+### Added
+- **Profiles.** Each profile has its own history, likes and playlists (with their covers), so several people can share one app, or you can keep your music apart. The profile is a round picture in the title bar next to the settings button: hover or click it to see the list and switch. A profile has a name and a picture; without a picture it shows the first letter of the name on a colour (chosen at random, and you can change it). Add, edit and delete profiles from the same list.
+- Settings, themes and the video checks stay shared by all profiles.
+
+### Changed
+- On the first start, the history, likes and playlists you already have become the first profile ("Me"). Nothing is lost, and you can rename it.
+- Switching a profile reloads the window, so playback stops and Home is rebuilt for the new profile.
+
 ## 1.4.0
 
 ### Added
@@ -34,12 +44,19 @@ The release notes on GitHub are built from this file automatically (see `scripts
 
 ## 1.0.0
 
-The first official release.
+The first official release. Silverpane (earlier called Glass Player) is a desktop music player with a frosted-glass look: YouTube Music, SoundCloud and your own files in one window, with no accounts.
 
-### Changed
-- The app is now called **Silverpane** (it was "Glass Player"): window, tray, installer, shortcut and file names. Your history, playlists and settings are moved from the old `Glass Player` data folder to `Silverpane` on the first start (the old folder is used instead if moving fails), and automatic updates from older versions keep working. The "start with the system" setting is carried over.
-- The repository moved to `BotrRobotgnom/silverpane` (the old address redirects).
-- New icon: a glass vinyl record (application, installer, tray and the title bar). README rewritten for the current feature set, with screenshots.
+### Added
+- **One search for two services.** YouTube Music and SoundCloud results in a single list, ordered by relevance. Icons show where a track is available. Paste a link to a track, playlist or artist.
+- **Other versions of a song** (remixes, slowed, sped up, live, covers) sit in a block under the result, and songs with the same title by different artists stay apart.
+- **Service priority.** Choose YouTube, SoundCloud or none. If one service cannot play a track, the other is used. A button in the track panel switches the version.
+- **Recommendations.** The queue is the track plus similar ones, and more are added as it runs out. Home shows picks from your history and likes, YouTube Music shelves and SoundCloud trends. Disliked tracks stop being suggested.
+- **Pages.** Artists with albums, singles and EPs, albums and playlists. One click saves a playlist to your own.
+- **Your library.** History (recent, most played, forgotten for a while), likes, and your own playlists with covers, all stored on your computer.
+- **Local music.** Link a folder to a playlist and every audio file in it becomes a track with its tags and cover.
+- **Interface.** Frosted glass with Silver and Graphite themes, adjustable transparency, tray icon with a mini player, media keys, start with the system and automatic updates (pre-releases only if you switch them on).
+- **Debug log** for finding problems (Settings > Developer mode).
+- New name and a vinyl-record icon. Data from the Glass Player folder is moved automatically on the first start.
 
 ## 0.5.1
 

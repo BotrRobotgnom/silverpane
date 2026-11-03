@@ -65,7 +65,9 @@ const published = (opt('published') || '')
   .sort(cmp);
 const previous = published.length ? published[published.length - 1] : null;
 
-const skipped = sections
+// A major release (1.0.0, 2.0.0 ...) is written as a whole by hand: it does not carry the older sections along
+const isMajor = /^\d+\.0\.0$/.test(version);
+const skipped = isMajor ? [] : sections
   .filter((s) => cmp(s.version, version) < 0 && (!previous || cmp(s.version, previous) > 0) && s.body)
   .sort((a, b) => cmp(b.version, a.version));
 

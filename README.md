@@ -50,6 +50,7 @@ npm start
 - Artist, album and playlist pages with their tracks. Save any playlist to your own.
 
 **Your library**
+- **Profiles**: each has its own history, likes and playlists, switched from the avatar in the title bar.
 - **History** (recent, most played, forgotten for a while) and **playlists** with their own covers. Everything stays on your computer.
 - **Local music**: create a playlist, press "Link a folder…" and pick a folder. Every audio file in it (and its subfolders: mp3, flac, wav, ogg, opus, m4a, aac, wma) becomes a track with its title, artist, album and cover art from the tags. The playlist is scanned again whenever you open it. Playing such a track from History continues through its playlist.
 
@@ -80,7 +81,7 @@ On Windows the blur is drawn by the system, and [Microsoft documents](https://le
 
 ## Your data
 
-Stored locally in the app data folder: `%APPDATA%\Silverpane` on Windows, `~/.config/Silverpane` on Linux. (Versions called "Glass Player" used a folder of that name; it is moved automatically on the first start.) It contains `history.json`, `playlists.json`, `reactions.json`, `blocked.json`, `themes.json` and `covers/`. Each file has a `.bak` copy, and a damaged file is restored from it. Back the folder up or copy it to another PC to move your library.
+Stored locally in the app data folder: `%APPDATA%\Silverpane` on Windows, `~/.config/Silverpane` on Linux. (Versions called "Glass Player" used a folder of that name; it is moved automatically on the first start.) `profiles.json` lists the profiles; each one has a folder in `profiles/` with `history.json`, `playlists.json`, `reactions.json` and `covers/`. `blocked.json` and `themes.json` are shared. Each file has a `.bak` copy, and a damaged file is restored from it. Back the folder up or copy it to another PC to move your library.
 
 Logs are in `logs/silverpane.log` there (rotated at 2 MB).
 
@@ -108,7 +109,7 @@ Build from a clone whose `origin` points to GitHub: `electron-builder` reads the
 | `src/main/youtube.js`, `soundcloud.js` | YouTube Music (`youtubei.js`) and SoundCloud search, pages, embeddability checks |
 | `src/main/match.js` | pairing the same track across services, grouping versions (pure logic) |
 | `src/main/recommend.js` | Home and similar tracks |
-| `src/main/library.js`, `local.js` | history, playlists, likes, local folders and tags |
+| `src/main/library.js`, `local.js`, `profiles.js` | history, playlists, likes, profiles, local folders and tags |
 | `src/renderer/theme.js`, `layers.js`, `themes-ui.js`, `src/main/themes.js` | theme engine, background layers, the Themes settings page, the themes folder |
 | `src/main/api.js` | the optional local API (now playing) |
 | `src/main/updater.js`, `releases.js` | updates through GitHub Releases |

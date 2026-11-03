@@ -9,6 +9,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import * as logger from './logger.js';
 import { yearOf } from './year.js';
+import * as profiles from './profiles.js';
 import { scanFolder, isAudioFile } from './local.js';
 
 const LOG_LIMIT = 5000; // chronological "recently played" entries; the per-track stats are never trimmed
@@ -44,8 +45,9 @@ function validTrack(track) {
 }
 
 // ---------- A small JSON file store: debounced, atomic writes, survives a corrupt file ----------
-export function createStore(fileName, defaults) {
-  const file = () => path.join(app.getPath('userData'), fileName);
+// personal: the file belongs to the active profile and is read again after a switch
+export function createStore(fileName, defaults, { personal = false } = {}) {
+  const file = () => path.join(personal ? profiles.activeDir() : app.getPath('userData'), fileName);
   let data = null;
   let timer = null;
 
@@ -113,13 +115,31 @@ export function createStore(fileName, defaults) {
     if (!timer) timer = setTimeout(save, 800);
   }
 
-  return { load, save, changed };
+  // Forget what is in memory, so the next load reads the file of the profile that is active now.
+  // The caller saves first (flushLibrary): saving here would write the old profile's data into the new profile's folder.
+  function reset() {
+    clearTimeout(timer);
+    timer = null;
+    data = null;
+  }
+
+  return { load, save, changed, reset };
 }
 
-const historyStore = createStore('history.json', () => ({ tracks: {}, log: [] }));
-const playlistStore = createStore('playlists.json', () => ({ playlists: [] }));
-const reactionStore = createStore('reactions.json', () => ({ items: {} }));
+const historyStore = createStore('history.json', () => ({ tracks: {}, log: [] }), { personal: true });
+const playlistStore = createStore('playlists.json', () => ({ playlists: [] }), { personal: true });
+const reactionStore = createStore('reactions.json', () => ({ items: {} }), { personal: true });
 const blockedStore = createStore('blocked.json', () => ({ ids: {}, ok: {} }));
+
+// Another profile became the active one: write everything of the old one, and start reading the new one
+export function reloadPersonal() {
+  historyStore.reset();
+  playlistStore.reset();
+  reactionStore.reset();
+  coverCache.clear();
+  localPaths.clear();
+  picked.clear();
+}
 
 export function flushLibrary() {
   historyStore.save();
@@ -292,7 +312,7 @@ export function clearHistory() {
 }
 
 // ---------- Playlists ----------
-const coversDir = () => path.join(app.getPath('userData'), 'covers');
+const coversDir = () => path.join(profiles.activeDir(), 'covers');
 const coverFile = (id) => path.join(coversDir(), `${id}.jpg`);
 const coverCache = new Map(); // id -> { stamp, url }
 

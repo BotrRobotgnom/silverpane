@@ -59,6 +59,13 @@ contextBridge.exposeInMainWorld('api', {
   debug: {
     open: () => ipcRenderer.invoke('debug:open'),
   },
+  profiles: {
+    list: () => ipcRenderer.invoke('profiles:list'),
+    create: (data) => ipcRenderer.invoke('profiles:create', data),
+    update: (data) => ipcRenderer.invoke('profiles:update', data),
+    switch: (id) => ipcRenderer.invoke('profiles:switch', id),
+    remove: (id) => ipcRenderer.invoke('profiles:remove', id),
+  },
   themes: {
     list: () => ipcRenderer.invoke('themes:list'),
     save: (theme) => ipcRenderer.invoke('themes:save', theme),

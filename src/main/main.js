@@ -23,6 +23,7 @@ import * as autostart from './autostart.js';
 import * as trayIcon from './tray.js';
 import * as api from './api.js';
 import * as themes from './themes.js';
+import * as profiles from './profiles.js';
 import { registerDebugIpc, openDebugWindow, closeDebugWindow } from './debugWindow.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -53,6 +54,8 @@ const isMac = process.platform === 'darwin';
   }
   app.setPath('userData', dir);
 }
+// Profiles: the first run turns the existing history and playlists into the first profile (before anything reads them)
+profiles.init();
 
 // Errors that would otherwise vanish: keep them in the log (and tell the user about fatal ones)
 process.on('unhandledRejection', (reason) => {
@@ -325,6 +328,28 @@ ipcMain.on('tray:labels', (_e, labels) => trayIcon.setLabels(labels));
 ipcMain.on('player:state', (_e, info) => {
   trayIcon.setNowPlaying(info);
   api.setNow(info);
+});
+// Profiles: each has its own history, likes and playlists
+const profileList = () => profiles.list();
+function switchTo(id) {
+  library.flushLibrary();
+  if (!profiles.setActive(id)) return false;
+  library.reloadPersonal();
+  resetCache();
+  return true;
+}
+ipcMain.handle('profiles:list', profileList);
+ipcMain.handle('profiles:create', (_e, data) => profiles.create(data));
+ipcMain.handle('profiles:update', (_e, data) => profiles.update(data));
+ipcMain.handle('profiles:switch', (_e, id) => switchTo(String(id)));
+ipcMain.handle('profiles:remove', (_e, id) => {
+  library.flushLibrary();
+  const r = profiles.remove(String(id));
+  if (r.activeChanged) {
+    library.reloadPersonal();
+    resetCache();
+  }
+  return r;
 });
 // Themes: custom ones live in themes.json, files are imported and exported through the system dialogs
 ipcMain.handle('themes:list', () => themes.list());

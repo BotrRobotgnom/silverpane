@@ -63,6 +63,10 @@
       </div>
 
       <div class="win-controls">
+        <div class="pf-wrap">
+          <button id="btnProfile" class="pf-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Profile" data-i18n-title="profile.title"></button>
+          <div id="pfPop" class="pf-pop card hidden" role="menu"></div>
+        </div>
         <button id="btnDebug" class="wbtn hidden" type="button" title="Debug log" data-i18n-title="win.debug"><svg><use href="#i-bug" /></svg></button>
         <button id="btnSettings" class="wbtn" type="button" title="Settings" data-i18n-title="win.settings"><svg><use href="#i-sliders" /></svg></button>
         <button id="btnPin" class="wbtn" type="button" title="Always on top" data-i18n-title="win.pin"><svg><use href="#i-pin" /></svg></button>
@@ -363,6 +367,35 @@ es.addEventListener('now', (e) => {
       </form>
     </dialog>
 
+    <dialog id="pfDialog" class="dialog card">
+      <form method="dialog" id="pfForm" class="dialog-body">
+        <h3 id="pfDialogTitle" data-i18n="profile.new">New profile</h3>
+        <div class="dialog-cover">
+          <div id="pfPreview" class="pf-av big"></div>
+          <div class="dialog-cover-btns">
+            <button id="pfPick" type="button" class="swap"><svg><use href="#i-image" /></svg><span data-i18n="playlist.chooseImage">Choose image…</span></button>
+            <button id="pfRemoveImg" type="button" class="swap hidden"><svg><use href="#i-close" /></svg><span data-i18n="playlist.removeImage">Remove image</span></button>
+          </div>
+        </div>
+        <label class="dialog-field">
+          <span data-i18n="profile.name">Name</span>
+          <input id="pfName" type="text" maxlength="24" spellcheck="false" placeholder="Name" data-i18n-placeholder="profile.namePlaceholder" />
+        </label>
+        <div id="pfColorField" class="dialog-field">
+          <span data-i18n="profile.color">Colour (used when there is no picture)</span>
+          <div id="pfColors" class="pf-colors" role="radiogroup"></div>
+        </div>
+        <small id="pfError" class="pf-error hidden"></small>
+        <div class="dialog-actions">
+          <button id="pfDelete" type="button" class="swap danger hidden" data-i18n="profile.delete">Delete</button>
+          <span class="grow"></span>
+          <button id="pfCancel" type="button" class="swap" data-i18n="common.cancel">Cancel</button>
+          <button id="pfSave" type="submit" class="swap primary" data-i18n="common.save">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <input id="pfFile" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" />
     <div id="toast" class="toast hidden"></div>
   </div>
 
@@ -376,6 +409,7 @@ es.addEventListener('now', (e) => {
   <script src="theme.js"></script>
   <script src="app.js"></script>
   <script src="themes-ui.js"></script>
+  <script src="profiles-ui.js"></script>
   <script src="library.js"></script>
   <script src="changelog.js"></script>
   <script src="home.js"></script>
